@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+	th:fragment="layout(content)">
+<head>
+<meta charset="ISO-8859-1">
+<title>Insert title here</title>
+<link
+	href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+	rel="stylesheet"
+	integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
+	crossorigin="anonymous">
+
+<link rel="stylesheet"
+	href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+	integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA=="
+	crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+<link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+	<!-- Start Navbar  -->
+	<nav class="navbar navbar-expand-lg  bg-primary fixed-top navbar-dark">
+		<div class="container-fluid">
+			<a class="navbar-brand" href="#"><i
+				class="fa-solid fa-cart-shopping"></i> Ecom Store</a>
+			<button class="navbar-toggler" type="button"
+				data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
+				aria-controls="navbarSupportedContent" aria-expanded="false"
+				aria-label="Toggle navigation">
+				<span class="navbar-toggler-icon"></span>
+			</button>
+			<div class="collapse navbar-collapse" id="navbarSupportedContent">
+				<ul class="navbar-nav me-auto mb-2 mb-lg-0">
+					<th:block th:if="${user==null}">
+						<li class="nav-item"><a class="nav-link active"
+							aria-current="page" href="/"><i class="fa-solid fa-house"></i>
+								Home</a></li>
+					</th:block>
+
+					<th:block th:unless="${user==null}">
+						<li class="nav-item" th:if="${user.role=='ROLE_ADMIN'}"><a
+							class="nav-link active" aria-current="page" href="/admin/"><i
+								class="fa-solid fa-house"></i> Home</a></li>
+
+						<li class="nav-item" th:if="${user.role=='ROLE_USER'}"><a
+							class="nav-link active" aria-current="page" href="/"><i
+								class="fa-solid fa-house"></i> Home</a></li>
+					</th:block>
+
+
+
+					<li class="nav-item"><a class="nav-link active"
+						aria-current="page" href="/products">Product</a></li>
+
+					<li class="nav-item dropdown"><a
+						class="nav-link dropdown-toggle" href="#" role="button"
+						data-bs-toggle="dropdown" aria-expanded="false"> Category </a>
+						<ul class="dropdown-menu">
+							<li th:each="c:${categorys}"><a class="dropdown-item"
+								th:href="@{'/products?category='+${c.name}}">[[${c.name}]]</a></li>
+
+						</ul></li>
+
+				</ul>
+
+				<ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+					<th:block th:if="${user==null}">
+						<li class="nav-item"><a class="nav-link active"
+							aria-current="page" href="/signin"><i
+								class="fa-solid fa-right-to-bracket"></i> LOGIN</a></li>
+						<li class="nav-item"><a class="nav-link active"
+							aria-current="page" href="/register">REGISTER</a></li>
+
+
+					</th:block>
+
+					<th:block th:if="${user!=null}">
+						<th:block th:if="${user.role=='ROLE_USER'}">
+							<li class="nav-item"><a class="nav-link active"
+								aria-current="page" href="/user/cart"><i
+									class="fa-solid fa-cart-shopping"></i> Cart [ [[${countCart}]]
+									]</a></li>
+						</th:block>
+						<li class="nav-item dropdown"><a
+							class="nav-link dropdown-toggle active" href="#" role="button"
+							data-bs-toggle="dropdown" aria-expanded="false"> <i
+								class="fa-solid fa-user"></i> [[${user.name}]]
+						</a>
+							<ul class="dropdown-menu">
+								<li th:if="${user.role=='ROLE_USER'}"><a
+									class="dropdown-item" href="/user/profile">Profile</a></li>
+
+								<li th:if="${user.role=='ROLE_ADMIN'}"><a
+									class="dropdown-item" href="/admin/profile">Profile</a></li>
+
+								<li th:if="${user.role=='ROLE_USER'}"><a
+									class="dropdown-item" href="/user/user-orders">My Orders</a></li>
+								<li><a class="dropdown-item" href="/logout">Logout</a></li>
+								<li><hr class="dropdown-divider"></li>
+
+							</ul></li>
+
+						<!-- <li class="nav-item"><a class="nav-link active"
+							aria-current="page" href="/logout"><i
+								class="fa-solid fa-right-to-bracket"></i> Logout</a></li> -->
+					</th:block>
+
+				</ul>
+
+			</div>
+		</div>
+	</nav>
+	<!-- End Navbar -->
+
+	<div th:replace="${content}"></div>
+
+	<!-- Start Footer -->
+	<div class="container-fluid p-1 bg-primary text-center text-white"
+		style="margin-top: 250px">
+		<p>ecom.com</p>
+	</div>
+	<!-- End Footer  -->
+
+	<!-- ═══════════════════════════════════════════════════════════
+	     SHOPPING ASSISTANT CHATBOT WIDGET
+	═══════════════════════════════════════════════════════════ -->
+
+	<!-- Floating Toggle Button -->
+	<button id="chat-toggle-btn" title="Shopping Assistant">
+		<i class="fa-solid fa-robot"></i>
+		<span class="chat-badge" id="chat-notif-badge">1</span>
+	</button>
+
+	<!-- Chat Window -->
+	<div id="chat-window">
+
+		<!-- Header -->
+		<div id="chat-header">
+			<div class="chat-avatar"><i class="fa-solid fa-robot"></i></div>
+			<div>
+				<div class="chat-title">Ecom Assistant</div>
+				<div class="chat-subtitle">&#x1F7E2; Online &bull; Ask me anything!</div>
+			</div>
+			<button id="chat-close-btn" title="Close"><i class="fa-solid fa-xmark"></i></button>
+		</div>
+
+		<!-- Messages -->
+		<div id="chat-messages">
+			<!-- Welcome message injected by JS -->
+		</div>
+
+		<!-- Quick Suggestion Chips -->
+		<div id="chat-suggestions">
+			<span class="chat-chip" data-msg="Show me mobiles under 10000">📱 Mobiles &lt;₹10k</span>
+			<span class="chat-chip" data-msg="Best laptops in stock">💻 Laptops</span>
+			<span class="chat-chip" data-msg="Shoes under 2000">👟 Shoes &lt;₹2k</span>
+			<span class="chat-chip" data-msg="Show me all books">📚 Books</span>
+			<span class="chat-chip" data-msg="Cheapest electronics available">⚡ Electronics</span>
+		</div>
+
+		<!-- Input Bar -->
+		<div id="chat-input-bar">
+			<input id="chat-input" type="text"
+				placeholder="Ask: shoes under ₹2000..."
+				maxlength="200" autocomplete="off" />
+			<button id="chat-send-btn" title="Send">
+				<i class="fa-solid fa-paper-plane"></i>
+			</button>
+		</div>
+
+	</div>
+	<!-- End Chatbot Widget -->
+
+	<!-- Jquery Validation Library  -->
+	<script
+		src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+	<script
+		src="https://cdn.jsdelivr.net/npm/jquery-validation@1.19.5/dist/jquery.validate.js"></script>
+	<script type="text/javascript" src="js/script.js"></script>
+	<script type="text/javascript" src="../js/script.js"></script>
+	<!-- End  -->
+	<script
+		src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+		integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+		crossorigin="anonymous"></script>
+
+	<!-- ── Chatbot Widget Script ── -->
+	<script>
+	(function () {
+		const toggleBtn  = document.getElementById('chat-toggle-btn');
+		const chatWindow = document.getElementById('chat-window');
+		const closeBtn   = document.getElementById('chat-close-btn');
+		const messagesEl = document.getElementById('chat-messages');
+		const inputEl    = document.getElementById('chat-input');
+		const sendBtn    = document.getElementById('chat-send-btn');
+		const badge      = document.getElementById('chat-notif-badge');
+		const chips      = document.querySelectorAll('.chat-chip');
+
+		let isOpen = false;
+		let hasWelcomed = false;
+
+		// ── Toggle open/close ────────────────────────────────────────────────
+		function openChat() {
+			chatWindow.classList.add('chat-open');
+			isOpen = true;
+			badge.style.display = 'none';
+			if (!hasWelcomed) {
+				hasWelcomed = true;
+				appendBotMsg(
+					'👋 Hi! I am your **Ecom Shopping Assistant**.\n\n' +
+					'Ask me to find products — try a chip below or type your own query!',
+					[]
+				);
+			}
+			setTimeout(() => inputEl.focus(), 320);
+		}
+		function closeChat() {
+			chatWindow.classList.remove('chat-open');
+			isOpen = false;
+		}
+
+		toggleBtn.addEventListener('click', () => isOpen ? closeChat() : openChat());
+		closeBtn.addEventListener('click', closeChat);
+
+		// ── Chip clicks ──────────────────────────────────────────────────────
+		chips.forEach(chip => {
+			chip.addEventListener('click', () => {
+				if (!isOpen) openChat();
+				sendMessage(chip.dataset.msg);
+			});
+		});
+
+		// ── Send on Enter ────────────────────────────────────────────────────
+		inputEl.addEventListener('keydown', e => {
+			if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(inputEl.value); }
+		});
+		sendBtn.addEventListener('click', () => sendMessage(inputEl.value));
+
+		// ── Send message ─────────────────────────────────────────────────────
+		function sendMessage(text) {
+			text = (text || '').trim();
+			if (!text) return;
+			inputEl.value = '';
+			appendUserMsg(text);
+			const typingEl = showTyping();
+
+			fetch('/api/chat', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ message: text })
+			})
+			.then(r => r.ok ? r.json() : Promise.reject(r.status))
+			.then(data => {
+				removeTyping(typingEl);
+				appendBotMsg(data.message, data.products || []);
+			})
+			.catch(() => {
+				removeTyping(typingEl);
+				appendBotMsg('⚠️ Sorry, something went wrong. Please try again.', []);
+			});
+		}
+
+		// ── Append user bubble ───────────────────────────────────────────────
+		function appendUserMsg(text) {
+			const div = document.createElement('div');
+			div.className = 'chat-msg user';
+			div.innerHTML =
+				'<div class="msg-avatar"><i class="fa-solid fa-user"></i></div>' +
+				'<div class="msg-bubble">' + escHtml(text) + '</div>';
+			messagesEl.appendChild(div);
+			scrollBottom();
+		}
+
+		// ── Append bot bubble ────────────────────────────────────────────────
+		function appendBotMsg(text, products) {
+			const div = document.createElement('div');
+			div.className = 'chat-msg bot';
+
+			// Format markdown-lite: **bold**, _italic_, • bullets, \n newlines
+			let html = escHtml(text)
+				.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+				.replace(/\_(.+?)\_/g, '<em>$1</em>')
+				.replace(/\n/g, '<br>');
+
+			// Product cards
+			let cardsHtml = '';
+			if (products && products.length > 0) {
+				cardsHtml = '<div class="chat-product-grid">';
+				products.forEach(p => {
+					const stockCls = p.inStock ? 'cp-in-stock' : 'cp-out-stock';
+					const stockTxt = p.inStock ? 'In Stock' : 'Out';
+					const price = p.price.toLocaleString('en-IN', {maximumFractionDigits:0});
+					cardsHtml +=
+						'<a href="/product/' + p.id + '" class="chat-product-card">' +
+						'<span class="cp-name">' + escHtml(p.title) + '</span>' +
+						'<span>' +
+						  '<span class="cp-price">&#8377;' + price + '</span>' +
+						  '<span class="cp-stock-badge ' + stockCls + '">' + stockTxt + '</span>' +
+						'</span>' +
+						'</a>';
+				});
+				cardsHtml += '</div>';
+			}
+
+			div.innerHTML =
+				'<div class="msg-avatar"><i class="fa-solid fa-robot"></i></div>' +
+				'<div class="msg-bubble">' + html + cardsHtml + '</div>';
+
+			messagesEl.appendChild(div);
+			scrollBottom();
+		}
+
+		// ── Typing indicator ─────────────────────────────────────────────────
+		function showTyping() {
+			const div = document.createElement('div');
+			div.className = 'chat-msg bot';
+			div.innerHTML =
+				'<div class="msg-avatar"><i class="fa-solid fa-robot"></i></div>' +
+				'<div class="chat-typing"><span></span><span></span><span></span></div>';
+			messagesEl.appendChild(div);
+			scrollBottom();
+			return div;
+		}
+		function removeTyping(el) { if (el && el.parentNode) el.parentNode.removeChild(el); }
+
+		// ── Helpers ──────────────────────────────────────────────────────────
+		function scrollBottom() {
+			setTimeout(() => messagesEl.scrollTop = messagesEl.scrollHeight, 30);
+		}
+		function escHtml(s) {
+			const d = document.createElement('div');
+			d.appendChild(document.createTextNode(s));
+			return d.innerHTML;
+		}
+	})();
+	</script>
+	<!-- ── End Chatbot Script ── -->
+
+</body>
+</html>
