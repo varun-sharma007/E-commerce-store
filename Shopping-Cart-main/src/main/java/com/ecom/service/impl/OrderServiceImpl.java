@@ -1,7 +1,6 @@
 package com.ecom.service.impl;
 
 import java.time.LocalDate;
-import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -20,7 +19,6 @@ import com.ecom.model.UserDtls;
 import com.ecom.repository.CartRepository;
 import com.ecom.repository.ProductOrderRepository;
 import com.ecom.service.OrderService;
-import com.ecom.util.CommonUtil;
 import com.ecom.util.OrderStatus;
 
 @Service
@@ -32,9 +30,6 @@ public class OrderServiceImpl implements OrderService {
 	@Autowired
 	private CartRepository cartRepository;
 
-	@Autowired
-	private CommonUtil commonUtil;
-
 	@Override
 	public void saveOrder(Integer userid, OrderRequest orderRequest) throws Exception {
 
@@ -43,16 +38,12 @@ public class OrderServiceImpl implements OrderService {
 		for (Cart cart : carts) {
 
 			ProductOrder order = new ProductOrder();
-
 			order.setOrderId(UUID.randomUUID().toString());
 			order.setOrderDate(LocalDate.now());
-
 			order.setProduct(cart.getProduct());
 			order.setPrice(cart.getProduct().getDiscountPrice());
-
 			order.setQuantity(cart.getQuantity());
 			order.setUser(cart.getUser());
-
 			order.setStatus(OrderStatus.IN_PROGRESS.getName());
 			order.setPaymentType(orderRequest.getPaymentType());
 
@@ -67,30 +58,21 @@ public class OrderServiceImpl implements OrderService {
 			address.setPincode(orderRequest.getPincode());
 
 			order.setOrderAddress(address);
-
-			ProductOrder saveOrder = orderRepository.save(order);
-
-			// Send confirmation email — wrapped in try-catch so a mail
-			// failure never breaks the order or causes a whitelabel error
-			try {
-				commonUtil.sendMailForProductOrder(saveOrder, "success");
-			} catch (Exception e) {
-				System.err.println("Order confirmation mail failed (order still saved): " + e.getMessage());
-			}
+			orderRepository.save(order);
 		}
 
-		// Clear the cart only after all orders are saved
 		if (!carts.isEmpty()) {
 			resetCart(carts.get(0).getUser());
 		}
 	}
+
 	private void resetCart(UserDtls user) {
 		cartRepository.deleteByUser(user);
 	}
+
 	@Override
 	public List<ProductOrder> getOrdersByUser(Integer userId) {
-		List<ProductOrder> orders = orderRepository.findByUserId(userId);
-		return orders;
+		return orderRepository.findByUserId(userId);
 	}
 
 	@Override
@@ -99,8 +81,7 @@ public class OrderServiceImpl implements OrderService {
 		if (findById.isPresent()) {
 			ProductOrder productOrder = findById.get();
 			productOrder.setStatus(status);
-			ProductOrder updateOrder = orderRepository.save(productOrder);
-			return updateOrder;
+			return orderRepository.save(productOrder);
 		}
 		return null;
 	}
@@ -114,12 +95,10 @@ public class OrderServiceImpl implements OrderService {
 	public Page<ProductOrder> getAllOrdersPagination(Integer pageNo, Integer pageSize) {
 		Pageable pageable = PageRequest.of(pageNo, pageSize);
 		return orderRepository.findAll(pageable);
-
 	}
 
 	@Override
 	public ProductOrder getOrdersByOrderId(String orderId) {
 		return orderRepository.findByOrderId(orderId);
 	}
-
 }

@@ -156,12 +156,6 @@ public class UserController {
 		}
 
 		ProductOrder updateOrder = orderService.updateOrderStatus(id, status);
-		
-		try {
-			commonUtil.sendMailForProductOrder(updateOrder, status);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
 
 		if (!ObjectUtils.isEmpty(updateOrder)) {
 			session.setAttribute("succMsg", "Status Updated");
